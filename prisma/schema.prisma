@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  Email     String    @unique @map("email")
+  Username  String    @unique @map("username")
+  FirstName String    @map("firstname")
+  LastName  String?   @map("lastname") @default("")
+  Post      Post[]
+  Comment   Comment[]
+  CreatedAt DateTime  @default(now()) @map("created_at")
+  UpdatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map(name: "user")
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  Title     String    @map("title") @db.Text
+  Content   String?   @map("content") @db.Text @default("")
+  Comment   Comment[]
+  User      User      @relation(fields: [user_id], references: [id],onDelete: Cascade, onUpdate: Cascade)
+  user_id   String
+  CreatedAt DateTime  @default(now()) @map("created_at")
+  UpdatedAt DateTime  @updatedAt @map("updated_at")
+
+
+  @@map(name: "post")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  Content   String   @map("content") @db.Text
+  Post      Post     @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post_id   String
+  User      User     @relation(fields: [user_id], references: [id],onDelete: Cascade, onUpdate: Cascade)
+  user_id   String
+  CreatedAt DateTime @default(now()) @map("created_at")
+  UpdatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map(name: "comment")
+}
